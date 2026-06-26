@@ -1,6 +1,7 @@
 // src/server.ts
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
+import path from "path";
 import { orchestrator } from "./index";
 import { connectToDatabase, saveAnalysisResult } from "./utils/db";
 import logger from "./utils/logger";
@@ -9,6 +10,13 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(process.cwd(), "public")));
+
+app.get("/", (req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), "public/index.html"));
+});
+
+
 
 const PORT = process.env.PORT || 5001;
 

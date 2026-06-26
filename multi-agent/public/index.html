@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustLens — Explainable Multi-Agent AI System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #0d0d15 100%);
+      color: #f3f4f6;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .neon-border-glow:focus {
+      outline: none;
+      border-color: #8b5cf6;
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="border-b border-white/5 py-4 px-6 md:px-12 flex justify-between items-center backdrop-blur-md sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+        <span class="text-white font-display font-extrabold text-xl">TL</span>
+      </div>
+      <div>
+        <h1 class="text-lg font-display font-bold tracking-tight text-white">TrustLens</h1>
+        <p class="text-xs text-white/40">Multi-Agent AI Safety Assistant</p>
+      </div>
+    </div>
+    <div class="flex gap-4 items-center">
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        API Online
+      </span>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 md:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Left Column: Input and Details -->
+    <div class="lg:col-span-5 flex flex-col gap-6">
+      <div class="glass-card rounded-2xl p-6 md:p-8 flex flex-col gap-5">
+        <div>
+          <h2 class="text-xl font-display font-semibold text-white">Analyze Message</h2>
+          <p class="text-sm text-white/50 mt-1">Paste emails, SMS, or chat conversations to scan for psychological manipulation and information risks.</p>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="messageInput" class="text-xs font-semibold text-white/70 uppercase tracking-wider">Message Content</label>
+          <textarea 
+            id="messageInput" 
+            rows="6" 
+            placeholder="Type or paste suspicious text here (e.g. 'Your bank account is locked! Send OTP immediately to verify...')"
+            class="w-full bg-white/5 rounded-xl border border-white/10 p-4 text-white font-sans text-sm focus:border-indigo-500 neon-border-glow transition duration-300 resize-none"
+          ></textarea>
+        </div>
+
+        <button 
+          id="analyzeBtn" 
+          onclick="runAnalysis()"
+          class="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:to-pink-600 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition duration-300 transform active:scale-[0.98] flex items-center justify-center gap-2"
+        >
+          <span id="btnText">Analyze Message</span>
+          <svg id="loadingSpinner" class="hidden animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Presets / Examples -->
+      <div class="glass-card rounded-2xl p-6 flex flex-col gap-4">
+        <h3 class="text-sm font-semibold uppercase tracking-wider text-white/50">Example Scams</h3>
+        <div class="flex flex-col gap-2">
+          <button 
+            onclick="loadExample(1)" 
+            class="text-left text-xs bg-white/5 hover:bg-white/10 border border-white/5 p-3 rounded-lg text-white/70 hover:text-white transition duration-200"
+          >
+            🚨 <strong>Bank OTP Alert:</strong> Urgency, authority pressure, credential harvesting.
+          </button>
+          <button 
+            onclick="loadExample(2)" 
+            class="text-left text-xs bg-white/5 hover:bg-white/10 border border-white/5 p-3 rounded-lg text-white/70 hover:text-white transition duration-200"
+          >
+            🎁 <strong>Lottery / Greed:</strong> Fake rewards, scarcity, money requests.
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Results Dashboard -->
+    <div class="lg:col-span-7 flex flex-col gap-6">
+      
+      <!-- Placeholder when no result -->
+      <div id="resultPlaceholder" class="glass-card rounded-3xl p-12 flex flex-col items-center justify-center text-center gap-4 flex-1">
+        <div class="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center">
+          <svg class="h-8 w-8 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-white/70">Awaiting Input</h3>
+          <p class="text-sm text-white/40 mt-1">Enter a message and click analyze to see multi-agent breakdown, risk scores, and safety recommendations.</p>
+        </div>
+      </div>
+
+      <!-- Result Screen -->
+      <div id="resultContainer" class="hidden flex flex-col gap-6">
+        
+        <!-- Threat Level Indicator Banner -->
+        <div id="threatBanner" class="p-6 rounded-2xl flex items-center justify-between border">
+          <div class="flex items-center gap-4">
+            <div id="threatBadge" class="h-12 w-12 rounded-xl flex items-center justify-center font-display font-extrabold text-lg text-white">
+              <!-- Severity Symbol -->
+            </div>
+            <div>
+              <div class="text-xs uppercase tracking-wider font-semibold opacity-70">Threat Level</div>
+              <div id="threatText" class="text-xl font-display font-extrabold">--</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div id="threatPercentage" class="text-4xl font-display font-black">0%</div>
+            <div class="text-xs opacity-50">Risk Index</div>
+          </div>
+        </div>
+
+        <!-- 2x2 Agent Analysis Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Agent 1: Understanding -->
+          <div class="glass-card rounded-2xl p-5 flex flex-col gap-3">
+            <div class="flex items-center gap-2">
+              <span class="text-indigo-400 font-bold text-sm">🤖 Agent 1:</span>
+              <span class="text-xs text-white/60 font-semibold uppercase tracking-wider">Understanding</span>
+            </div>
+            <hr class="border-white/10">
+            <div class="flex flex-col gap-2 text-xs">
+              <div><strong class="text-white/60">Sender Claim:</strong> <span id="agent1Claim" class="text-white">None</span></div>
+              <div><strong class="text-white/60">Requested Action:</strong> <span id="agent1Action" class="text-white">None</span></div>
+              <div><strong class="text-white/60">Deadline Indicator:</strong> <span id="agent1Urgency" class="text-white">None</span></div>
+            </div>
+          </div>
+
+          <!-- Agent 2: Manipulation -->
+          <div class="glass-card rounded-2xl p-5 flex flex-col gap-3">
+            <div class="flex items-center gap-2">
+              <span class="text-purple-400 font-bold text-sm">🧠 Agent 2:</span>
+              <span class="text-xs text-white/60 font-semibold uppercase tracking-wider">Psychological Tactics</span>
+            </div>
+            <hr class="border-white/10">
+            <div id="agent2Tactics" class="flex flex-wrap gap-1.5">
+              <!-- Badges of detected manipulation -->
+            </div>
+          </div>
+
+          <!-- Agent 3: Sensitive Info -->
+          <div class="glass-card rounded-2xl p-5 flex flex-col gap-3">
+            <div class="flex items-center gap-2">
+              <span class="text-pink-400 font-bold text-sm">🛡️ Agent 3:</span>
+              <span class="text-xs text-white/60 font-semibold uppercase tracking-wider">Information Risks</span>
+            </div>
+            <hr class="border-white/10">
+            <div id="agent3Risks" class="flex flex-col gap-1.5 text-xs">
+              <!-- List of sensitive info items -->
+            </div>
+          </div>
+
+          <!-- Agent 5: Safe Action Advisor -->
+          <div class="glass-card rounded-2xl p-5 flex flex-col gap-3">
+            <div class="flex items-center gap-2">
+              <span class="text-amber-400 font-bold text-sm">💡 Agent 5:</span>
+              <span class="text-xs text-white/60 font-semibold uppercase tracking-wider">Safety Advice</span>
+            </div>
+            <hr class="border-white/10">
+            <ul id="agent5Recommendations" class="list-disc pl-4 space-y-1 text-xs text-amber-100/90">
+              <!-- Safety actions list -->
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="border-t border-white/5 py-6 text-center text-xs text-white/30">
+    TrustLens © 2026 AlphaPack — Built for Digital Communication Safety.
+  </footer>
+
+  <script>
+    const examples = {
+      1: "URGENT NOTICE from Bank Official! Your Account is temporarily frozen due to unauthorized login attempts. To prevent permanent suspension of all transfers, please reply with your OTP code within 10 minutes. Real bank officials are securing your funds.",
+      2: "Congratulations! You have been selected as the exclusive winner of our lottery award sum of $5,000. ONLY 3 slots are left! Kindly submit your passport photo and bank account details immediately to verify your prize."
+    };
+
+    function loadExample(id) {
+      document.getElementById('messageInput').value = examples[id];
+    }
+
+    async function runAnalysis() {
+      const input = document.getElementById('messageInput').value.trim();
+      if (!input) {
+        alert("Please enter a message to analyze.");
+        return;
+      }
+
+      const btnText = document.getElementById('btnText');
+      const spinner = document.getElementById('loadingSpinner');
+      const placeholder = document.getElementById('resultPlaceholder');
+      const container = document.getElementById('resultContainer');
+
+      btnText.textContent = "Analyzing...";
+      spinner.classList.remove('hidden');
+
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ text: input })
+        });
+
+        const resData = await response.json();
+        if (resData.success) {
+          placeholder.classList.add('hidden');
+          container.classList.remove('hidden');
+          
+          const result = resData.data;
+
+          // 1. Banner & Risk Scoring
+          const score = result.riskScore;
+          const threatBanner = document.getElementById('threatBanner');
+          const threatBadge = document.getElementById('threatBadge');
+          const threatText = document.getElementById('threatText');
+          const threatPercentage = document.getElementById('threatPercentage');
+
+          threatPercentage.textContent = `${score.percentage}%`;
+          threatText.textContent = `${score.severity} Severity`;
+
+          if (score.severity === 'High') {
+            threatBanner.className = "p-6 rounded-2xl flex items-center justify-between border border-red-500/30 bg-red-950/20 text-red-200";
+            threatBadge.className = "h-12 w-12 rounded-xl flex items-center justify-center font-display font-extrabold text-lg text-white bg-red-600";
+            threatBadge.textContent = "⚠️";
+          } else if (score.severity === 'Medium') {
+            threatBanner.className = "p-6 rounded-2xl flex items-center justify-between border border-amber-500/30 bg-amber-950/20 text-amber-200";
+            threatBadge.className = "h-12 w-12 rounded-xl flex items-center justify-center font-display font-extrabold text-lg text-white bg-amber-600";
+            threatBadge.textContent = "⚡";
+          } else {
+            threatBanner.className = "p-6 rounded-2xl flex items-center justify-between border border-emerald-500/30 bg-emerald-950/20 text-emerald-200";
+            threatBadge.className = "h-12 w-12 rounded-xl flex items-center justify-center font-display font-extrabold text-lg text-white bg-emerald-600";
+            threatBadge.textContent = "✅";
+          }
+
+          // 2. Agent 1: Understanding
+          const u = result.messageUnderstanding;
+          document.getElementById('agent1Claim').textContent = u.claims && u.claims.length ? u.claims.join(', ') : 'None detected';
+          document.getElementById('agent1Action').textContent = u.actions && u.actions.length ? u.actions.join(', ') : 'None detected';
+          document.getElementById('agent1Urgency').textContent = u.urgency || 'None detected';
+
+          // 3. Agent 2: Manipulation Tactics
+          const m = result.psychologicalManipulation;
+          const mContainer = document.getElementById('agent2Tactics');
+          mContainer.innerHTML = '';
+          const tacticsMap = {
+            fearInduction: 'Fear Induction',
+            artificialUrgency: 'Artificial Urgency',
+            authorityPressure: 'Authority Pressure',
+            greed: 'Greed Tactic',
+            scarcity: 'Scarcity / Limit',
+            emotionalGuilt: 'Emotional Guilt',
+            trustExploitation: 'Trust Exploitation'
+          };
+          
+          let manipulationFound = false;
+          for (const [key, label] of Object.entries(tacticsMap)) {
+            if (m[key]) {
+              manipulationFound = true;
+              const badge = document.createElement('span');
+              badge.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30";
+              badge.textContent = label;
+              mContainer.appendChild(badge);
+            }
+          }
+          if (!manipulationFound) {
+            const noTactic = document.createElement('span');
+            noTactic.className = "text-xs text-white/40 italic";
+            noTactic.textContent = "No psychological manipulation tactics detected.";
+            mContainer.appendChild(noTactic);
+          }
+
+          // 4. Agent 3: Information Risk
+          const s = result.sensitiveInfoRisk;
+          const sContainer = document.getElementById('agent3Risks');
+          sContainer.innerHTML = '';
+          const infoMap = {
+            containsOTP: 'OTP / Passcode Request',
+            containsPassword: 'Password / Credentials Request',
+            containsBankDetails: 'Bank Details Request',
+            containsPersonalID: 'Identity Document Request'
+          };
+
+          let sensitiveFound = false;
+          for (const [key, label] of Object.entries(infoMap)) {
+            const row = document.createElement('div');
+            row.className = "flex items-center justify-between";
+            const labelSpan = document.createElement('span');
+            labelSpan.className = s[key] ? "text-red-400 font-semibold" : "text-white/40";
+            labelSpan.textContent = label;
+            const statusSpan = document.createElement('span');
+            statusSpan.className = s[key] ? "text-red-400" : "text-white/20";
+            statusSpan.textContent = s[key] ? "🚨 Yes" : "No";
+            
+            row.appendChild(labelSpan);
+            row.appendChild(statusSpan);
+            sContainer.appendChild(row);
+          }
+
+          // 5. Agent 5: Safe Action Advisor
+          const advice = result.safeActionAdvisor.recommendations;
+          const aContainer = document.getElementById('agent5Recommendations');
+          aContainer.innerHTML = '';
+          advice.forEach(rec => {
+            const li = document.createElement('li');
+            li.textContent = rec;
+            aContainer.appendChild(li);
+          });
+
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to analyze message. Make sure the server is running.");
+      } finally {
+        btnText.textContent = "Analyze Message";
+        spinner.classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
