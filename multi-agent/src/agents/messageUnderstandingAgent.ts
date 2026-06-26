@@ -1,4 +1,6 @@
 // src/agents/messageUnderstandingAgent.ts
+import { Context, AgentResult } from "../utils/types";
+
 export interface MessageContext {
   content: string;
   sender?: string;
@@ -45,3 +47,9 @@ export function understandMessage(ctx: MessageContext): UnderstandingResult {
   const baseMessage = content.replace(/\s+/g, ' ').trim();
   return { baseMessage, claims, actions, urgency };
 }
+
+export async function processMessageUnderstanding(input: string, _ctx: Context): Promise<AgentResult> {
+  const result = understandMessage({ content: input });
+  return { messageUnderstanding: result };
+}
+

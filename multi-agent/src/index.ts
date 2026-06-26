@@ -3,29 +3,36 @@ import { processPsychologicalManipulation } from "./agents/psychologicalManipula
 import { processSensitiveInfoRisk } from "./agents/sensitiveInfoRiskAgent";
 import { processRiskScoring } from "./agents/riskScoringAgent";
 import { processSafeActionAdvisor } from "./agents/safeActionAdvisorAgent";
-import { AggregatedResult, AgentResult, Context } from "./utils/types";
+import { AggregatedResult, Context } from "./utils/types";
 import logger from "./utils/logger";
 import defaultConfig from "./config/defaultConfig";
 
-// Simple orchestrator that runs all agents in parallel and aggregates results.
+// Orchestrator that runs agents in sequence to pass intermediate results.
 export async function orchestrator(rawText: string, extraContext: Partial<Context> = {}): Promise<AggregatedResult> {
   const context: Context = { ...defaultConfig.contextDefaults, ...extraContext };
   logger.info("Orchestrator received input", rawText);
 
-  const promises: Promise<AgentResult>[] = [
-    processMessageUnderstanding(rawText, context),
-    processPsychologicalManipulation(rawText, context),
-    processSensitiveInfoRisk(rawText, context),
-    processRiskScoring(rawText, context),
-    processSafeActionAdvisor(rawText, context),
-  ];
+  const messageUnderstanding = await processMessageUnderstanding(rawText, context);
+  const psychologicalManipulation = await processPsychologicalManipulation(rawText, context);
+  const sensitiveInfoRisk = await processSensitiveInfoRisk(rawText, context);
 
-  const results = await Promise.all(promises);
+  const intermediate = {
+    ...messageUnderstanding,
+    ...psychologicalManipulation,
+    ...sensitiveInfoRisk,
+  };
 
-  // Simple aggregation – combine all agent outputs into a single object.
-  const aggregated: AggregatedResult = results.reduce((acc, cur) => {
-    return { ...acc, ...cur };
-  }, {} as AggregatedResult);
+  const scoringContext = { ...context, intermediate };
+  const riskScoring = await processRiskScoring(rawText, scoringContext);
+
+  const advisorContext = { ...context, intermediate, ...riskScoring };
+  const safeActionAdvisor = await processSafeActionAdvisor(rawText, advisorContext);
+
+  const aggregated: AggregatedResult = {
+    ...intermediate,
+    ...riskScoring,
+    ...safeActionAdvisor,
+  };
 
   logger.info("Aggregated result", aggregated);
   return aggregated;
@@ -42,3 +49,4 @@ if (require.main === module) {
     console.log(JSON.stringify(result, null, 2));
   });
 }
+
